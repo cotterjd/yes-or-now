@@ -34,7 +34,7 @@
     <Button label="Submit" @click="enterGame" />
   </Dialog>
 
-  <version />
+  <Version />
 </template>
 
 <script lang="ts">
@@ -46,6 +46,7 @@ import InputText from "primevue/inputtext";
 import Button from "primevue/button";
 import Response from "./Response.vue";
 import Claim from "./Claim.vue";
+import Version from "./Version.vue";
 
 export default defineComponent({
   components: {
@@ -55,6 +56,7 @@ export default defineComponent({
     Dialog,
     InputText,
     Button,
+    Version,
   },
   data: () => {
     return {
@@ -91,6 +93,7 @@ export default defineComponent({
   },
   mounted() {
     this.socket = new WebSocket("ws://localhost:3000");
+    // this.socket = new WebSocket("wss://nodejs-socket-server.onrender.com");
     this.socket.onmessage = (event) => {
       console.log(event.data);
       this.$store.commit(`updateGame`, JSON.parse(event.data));

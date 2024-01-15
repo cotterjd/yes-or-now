@@ -5,7 +5,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import Home from "./components/PageHome.vue";
-// import "primevue/resources/themes/lara-dark-purple/theme.css"
 import "primevue/resources/themes/vela-green/theme.css";
 
 export default defineComponent({
