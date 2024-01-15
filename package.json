@@ -7,7 +7,7 @@
     "start": "npm run serve -- --port 8081",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "deploy": "echo yron.cotterslist.com > dist/CNAME && gh-pages -d dist",
+    "deploy": "echo yorn.cotterslist.com > dist/CNAME && gh-pages -d dist",
     "predeploy": "yarn build"
   },
   "dependencies": {
