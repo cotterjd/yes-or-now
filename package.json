@@ -7,7 +7,7 @@
     "start": "npm run serve -- --port 8081",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "deploy": "echo time.cotterslist.com > dist/CNAME && gh-pages -d dist",
+    "deploy": "echo yron.cotterslist.com > dist/CNAME && gh-pages -d dist",
     "predeploy": "yarn build"
   },
   "dependencies": {
@@ -46,14 +46,8 @@
       "ecmaVersion": 2020
     },
     "rules": {
-      "semi": [
-        0,
-        "never"
-      ],
-      "quotes": [
-        0,
-        "backtick"
-      ],
+      "semi": [0, "never"],
+      "quotes": [0, "backtick"],
       "consistent-return": 0,
       "no-alert": 0,
       "no-return-assign": 0,
@@ -69,10 +63,5 @@
       "arrow-parens": 0
     }
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead",
-    "not ie 11"
-  ]
+  "browserslist": ["> 1%", "last 2 versions", "not dead", "not ie 11"]
 }
