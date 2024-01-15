@@ -1,43 +1,155 @@
-import Vue from "vue"
-import { createStore } from 'vuex'
-import createPersistedState from 'vuex-persistedstate'
+import Vue from "vue";
+import { createStore } from "vuex";
+import createPersistedState from "vuex-persistedstate";
 
-const defaultState = {
-  addingName: false,
-  gameStarted: false,
-  playerTurn: '',
-  players: [],
-  statement: '',
+interface Player {
+  name: string;
+  response: string;
 }
 
-export default createStore({
-  state: defaultState,
-  getters: {
+interface GameState {
+  gameStarted: boolean;
+  playerTurn: string;
+  players: Player[];
+  statement: string;
+  remainingStatements: string[];
+  viewedStatements: string[];
+}
+
+interface State {
+  playerName: string;
+  game: GameState;
+}
+const defaultState: State = {
+  playerName: ``,
+  game: {
+    gameStarted: false,
+    playerTurn: "",
+    players: [],
+    statement: "",
+    remainingStatements: [
+      `Bigfoot is real`,
+      `The Earth is flat`,
+      `Aliens are real`,
+    ],
+    viewedStatements: [],
   },
+};
+
+const store = createStore({
+  state: defaultState,
+  getters: {},
   mutations: {
     updateState(state, newState) {
-      Object.assign(state, newState)
-    }
+      Object.assign(state, newState);
+    },
+    updateGame(state, newState) {
+      Object.assign(state.game, newState);
+    },
   },
   actions: {
     enterGame({ commit, state }, data) {
+      console.log(state.game);
+      const newState: Partial<State> = {
+        game: {
+          ...state.game,
+          players: [
+            ...state.game.players.filter((p) => p.name !== data.player),
+            { name: data.player, response: `` },
+          ],
+          gameStarted: true,
+          playerTurn: state.game.players.length
+            ? state.game.playerTurn
+            : data.player,
+        },
+        playerName: data.player,
+      };
+      sendGameState(data.socket, newState.game);
+      commit("updateState", newState);
+    },
+    getClaim({ commit, state }, socket) {
+      if (!state.game.remainingStatements.length) {
+        const statement = `Game Over.`;
+        const gameState = {
+          statement,
+          remainingStatements: state.game.viewedStatements,
+          viewedStatements: [],
+        };
+        commit("updateGame", gameState);
+        sendGameState(socket, gameState);
+        return;
+      }
+      const statement =
+        state.game.remainingStatements[
+          getRandomIndex(state.game.remainingStatements.length)
+        ];
+      const gameState = {
+        statement,
+        remainingStatements: state.game.remainingStatements.filter(
+          (s) => s !== statement
+        ),
+        viewedStatements: [...state.game.viewedStatements, statement],
+      };
+      sendGameState(socket, gameState);
+      commit("updateGame", gameState);
+    },
+    leaveGame({ commit, state }, socket) {
       const newState = {
-        players: Array.from(new Set([...state.players, data.player])),
-        addingName: false,
-        gameStarted: true,
-      }
-      data.socket.send(JSON.stringify(newState)) 
-      commit('updateState', newState)
+        game: {
+          ...state.game,
+          players: state.game.players.filter(
+            (p) => p.name !== state.playerName
+          ),
+        },
+        playerName: ``,
+      };
+      sendGameState(socket, newState.game);
+      commit("updateState", newState);
     },
-    startStopGame({ commit, state }, socket) {
-      const newState = state.gameStarted ? defaultState : {
-        addingName: true
-      }
-      socket.send(JSON.stringify(newState)) 
-      commit('updateState', newState)
+    postResponse({ commit, state }, data) {
+      const newGameState: Partial<GameState> = {
+        ...state.game,
+        players: state.game.players.map((p) =>
+          p.name === data.player ? { ...p, response: data.response } : p
+        ),
+        // playerTurn:
+        //   state.game.players[
+        //     (state.game.players.findIndex(
+        //       (p) => p.name === state.game.playerTurn
+        //     ) +
+        //       1) %
+        //       state.game.players.length
+        //   ].name,
+      };
+      sendGameState(data.socket, newGameState);
+      commit("updateGame", newGameState);
+    },
+    nextTurn({ commit, state }, socket) {
+      const newGameState: Partial<GameState> = {
+        ...state.game,
+        playerTurn:
+          state.game.players[
+            (state.game.players.findIndex(
+              (p) => p.name === state.game.playerTurn
+            ) +
+              1) %
+              state.game.players.length
+          ].name,
+      };
+      sendGameState(socket, newGameState);
+      commit("updateGame", newGameState);
     },
   },
-  modules: {
-  },
+  modules: {},
   plugins: [createPersistedState()],
-})
+});
+
+function sendGameState(socket, gameState) {
+  socket.send(JSON.stringify(gameState));
+}
+
+function getRandomIndex(max) {
+  return Math.floor(Math.random() * max);
+}
+
+export default store;
