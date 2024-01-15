@@ -1,5 +1,8 @@
 <template>
   <h1>{{ game.statement }}</h1>
+  <p v-if="game.statement === 'Game over.'">
+    (Add more statements from the menu to play longer games)
+  </p>
 </template>
 
 <script lang="ts">
@@ -19,7 +22,11 @@ export default defineComponent({
     ...mapState([`game`, `playerName`]),
   },
   mounted() {
-    if (this.game.gameStarted && this.game.playerTurn === this.playerName && !this.game.statement) {
+    if (
+      this.game.gameStarted &&
+      this.game.playerTurn === this.playerName &&
+      !this.game.statement
+    ) {
       this.getClaim();
     }
   },

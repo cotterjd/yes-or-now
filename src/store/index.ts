@@ -76,7 +76,7 @@ const store = createStore({
     },
     getClaim({ commit, state }, socket) {
       if (!state.game.remainingStatements.length) {
-        const statement = `Game Over.`;
+        const statement = `Game over.`;
         const gameState = {
           statement,
           remainingStatements: state.game.viewedStatements,
