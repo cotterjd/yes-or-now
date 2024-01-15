@@ -92,8 +92,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    this.socket = new WebSocket("ws://localhost:3000");
-    // this.socket = new WebSocket("wss://nodejs-socket-server.onrender.com");
+    this.socket = new WebSocket(process.env.VUE_APP_WS_URL);
     this.socket.onmessage = (event) => {
       console.log(event.data);
       this.$store.commit(`updateGame`, JSON.parse(event.data));
