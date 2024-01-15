@@ -34,6 +34,15 @@
     <Button label="Submit" @click="enterGame" />
   </Dialog>
 
+  <Dialog header="Input Statement" v-model:visible="addingStatement">
+    <InputText
+      placeholder="Statement"
+      v-model="statementInput"
+      @keyup.enter="submitStatement"
+    />
+    <Button label="Submit" @click="submitStatement" />
+  </Dialog>
+
   <Version />
 </template>
 
@@ -64,6 +73,8 @@ export default defineComponent({
       playerNameInput: "",
       menuItems: [],
       addingName: false,
+      addingStatement: false,
+      statementInput: "",
     };
   },
   computed: {
@@ -87,6 +98,9 @@ export default defineComponent({
         },
         {
           label: `Add statement`,
+          command: () => {
+            this.addingStatement = true;
+          },
         },
       ];
     },
@@ -107,6 +121,18 @@ export default defineComponent({
       console.log(event.data);
       this.$store.commit(`updateGame`, JSON.parse(event.data));
     };
+
+    // grab statements from local stroage
+    const vuex = JSON.parse(localStorage.getItem(`vuex`));
+    if (vuex) {
+      const game = vuex.game;
+      const statements = [
+        ...game.remainingStatements,
+        ...game.viewedStatements,
+      ];
+      this.$store.commit(`updateStatements`, statements);
+    }
+
     // todo clean this up
     const label = this.game.gameStarted ? `Leave game` : `Enter game`;
     this.menuItems = [
@@ -122,9 +148,11 @@ export default defineComponent({
       },
       {
         label: `Add statement`,
+        command: () => {
+          this.addingStatement = true;
+        },
       },
     ];
-    // const gameState = JSON.parse(localStorage.getItem(`vuex`)).game;
   },
   methods: {
     enterGame() {
@@ -147,6 +175,13 @@ export default defineComponent({
     next(response: string) {
       this.$store.dispatch(`nextTurn`, this.socket);
       this.$store.dispatch(`getClaim`, this.socket);
+    },
+    submitStatement() {
+      this.$store.dispatch(`submitStatement`, {
+        socket: this.socket,
+        statement: this.statementInput,
+      });
+      this.addingStatement = false;
     },
   },
 });

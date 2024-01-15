@@ -46,6 +46,13 @@ const store = createStore({
     updateGame(state, newState) {
       Object.assign(state.game, newState);
     },
+    updateStatements(state, statements) {
+      const allStatements = new Set([
+        ...state.game.remainingStatements,
+        ...statements,
+      ]);
+      Object.assign(state.game.remainingStatements, Array.from(allStatements));
+    },
   },
   actions: {
     enterGame({ commit, state }, data) {
@@ -135,8 +142,20 @@ const store = createStore({
               1) %
               state.game.players.length
           ].name,
+        players: state.game.players.map((p) => ({ ...p, response: `` })),
       };
       sendGameState(socket, newGameState);
+      commit("updateGame", newGameState);
+    },
+    submitStatement({ commit, state }, data) {
+      const newGameState: Partial<GameState> = {
+        ...state.game,
+        remainingStatements: [
+          ...state.game.remainingStatements,
+          data.statement,
+        ],
+      };
+      sendGameState(data.socket, newGameState);
       commit("updateGame", newGameState);
     },
   },
