@@ -92,7 +92,17 @@ export default defineComponent({
     },
   },
   mounted() {
+    console.log(process.env.VUE_APP_WS_URL);
     this.socket = new WebSocket(process.env.VUE_APP_WS_URL);
+    this.socket.onopen = () => {
+      console.log(`socket server connected!`);
+    };
+    this.socket.onclose = () => {
+      console.log(`socket server disconnected`);
+    };
+    this.socket.onerror = (error) => {
+      console.log(`socket server error: ${error}`);
+    };
     this.socket.onmessage = (event) => {
       console.log(event.data);
       this.$store.commit(`updateGame`, JSON.parse(event.data));
